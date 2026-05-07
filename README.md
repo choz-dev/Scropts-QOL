@@ -28,6 +28,7 @@ The latest version can be found on the [Releases Page](https://github.com/Scropt
 
 ## Credits
 - [Serious](https://github.com/shiversoftdev): Custom Profile Snapshots
+- InsaneCallum: Rank Up in Custom Zombies
 
 ## Support Me
 [![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/Z8Z41Z1VT6)
