@@ -79,6 +79,7 @@ bool bTracers;
 bool bAllTracers;
 bool bModTools = true;
 bool bZombieCounter;
+bool bZombieCounterDebug;
 
 int iBlackmarketAmt = 999;
 int iBribe;

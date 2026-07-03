@@ -75,6 +75,7 @@ extern bool bUIRgb;
 extern bool bUnlockDLC;
 extern bool bUnlockFullGame;
 extern bool bZombieCounter;
+extern bool bZombieCounterDebug;
 extern bool bNukes;
 extern bool bModTools;
 

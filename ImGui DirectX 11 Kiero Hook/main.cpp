@@ -242,6 +242,27 @@ void drawTracers() {
 */
 static constexpr uintptr_t ZOMBIE_COUNTER_OFFSET = 0x1767A038;
 
+static constexpr uintptr_t ZOMBIE_COUNTER_DEBUG_OFFSETS[] = {
+	0xA037D0C,
+	0x17679850,
+	0x17679908,
+	0x176799C0,
+	0x17679A78,
+	0x17679B30,
+	0x17679BE8,
+	0x17679CA0,
+	0x17679D58,
+	0x17679E10,
+	0x17679EC8,
+	0x17679F80,
+	0x1767A038,
+	0x1767A0F0,
+	0x1767A1A8,
+	0x1767A260,
+	0x1767A318,
+	0x196C89FC,
+};
+
 static bool CanReadAddress(uintptr_t address)
 {
 	MEMORY_BASIC_INFORMATION mbi{};
@@ -265,37 +286,32 @@ static bool CanReadAddress(uintptr_t address)
 	return (mbi.Protect & readable) != 0;
 }
 
-static bool TryReadZombiesLeft(int& zombiesLeft)
+static bool TryReadIntOffset(uintptr_t offset, int& value)
 {
-	const uintptr_t address = ProcessBase + ZOMBIE_COUNTER_OFFSET;
+	const uintptr_t address = ProcessBase + offset;
 	if (!CanReadAddress(address))
 		return false;
 
 	__try {
-		zombiesLeft = *reinterpret_cast<int*>(address);
+		value = *reinterpret_cast<int*>(address);
 	}
 	__except (EXCEPTION_EXECUTE_HANDLER) {
 		return false;
 	}
 
+	return true;
+}
+
+static bool TryReadZombiesLeft(int& zombiesLeft)
+{
+	if (!TryReadIntOffset(ZOMBIE_COUNTER_OFFSET, zombiesLeft))
+		return false;
+
 	return zombiesLeft >= 0 && zombiesLeft < 4096;
 }
 
-static void DrawZombieCounterOverlay()
+static float GetOverlayScreenWidth()
 {
-	if (!bZombieCounter)
-		return;
-
-	int zombiesLeft = 0;
-	if (!TryReadZombiesLeft(zombiesLeft))
-		return;
-
-	char text[64]{};
-	sprintf_s(text, "Zombies: %d", zombiesLeft);
-
-	const float fontSize = 24.0f;
-	ImFont* font = ImGui::GetFont();
-	const ImVec2 textSize = font->CalcTextSizeA(fontSize, FLT_MAX, 0.0f, text);
 	float screenWidth = ImGui::GetIO().DisplaySize.x;
 	if (screenWidth <= 0.0f) {
 		RECT rect{};
@@ -304,11 +320,53 @@ static void DrawZombieCounterOverlay()
 		}
 	}
 
-	const ImVec2 pos((screenWidth - textSize.x) * 0.5f, 32.0f);
+	return screenWidth;
+}
 
+static void DrawZombieCounterOverlay()
+{
+	if (!bZombieCounter && !bZombieCounterDebug)
+		return;
+
+	int zombiesLeft = 0;
+	ImFont* font = ImGui::GetFont();
 	ImDrawList* drawList = ImGui::GetForegroundDrawList();
-	drawList->AddText(font, fontSize, ImVec2(pos.x + 2.0f, pos.y + 2.0f), IM_COL32(0, 0, 0, 210), text);
-	drawList->AddText(font, fontSize, pos, IM_COL32(255, 255, 255, 255), text);
+	const float screenWidth = GetOverlayScreenWidth();
+
+	if (bZombieCounter && TryReadZombiesLeft(zombiesLeft)) {
+		char text[64]{};
+		sprintf_s(text, "Zombies: %d", zombiesLeft);
+
+		const float fontSize = 24.0f;
+		const ImVec2 textSize = font->CalcTextSizeA(fontSize, FLT_MAX, 0.0f, text);
+		const ImVec2 pos((screenWidth - textSize.x) * 0.5f, 32.0f);
+		drawList->AddText(font, fontSize, ImVec2(pos.x + 2.0f, pos.y + 2.0f), IM_COL32(0, 0, 0, 210), text);
+		drawList->AddText(font, fontSize, pos, IM_COL32(255, 255, 255, 255), text);
+	}
+
+	if (!bZombieCounterDebug)
+		return;
+
+	const float debugFontSize = 16.0f;
+	const float lineHeight = 18.0f;
+	const float startY = bZombieCounter ? 72.0f : 32.0f;
+	float y = startY;
+	for (uintptr_t offset : ZOMBIE_COUNTER_DEBUG_OFFSETS) {
+		int value = 0;
+		char text[96]{};
+		if (TryReadIntOffset(offset, value)) {
+			sprintf_s(text, "blackops3.exe+%llX = %d", static_cast<unsigned long long>(offset), value);
+		}
+		else {
+			sprintf_s(text, "blackops3.exe+%llX = --", static_cast<unsigned long long>(offset));
+		}
+
+		const ImVec2 textSize = font->CalcTextSizeA(debugFontSize, FLT_MAX, 0.0f, text);
+		const ImVec2 pos((screenWidth - textSize.x) * 0.5f, y);
+		drawList->AddText(font, debugFontSize, ImVec2(pos.x + 1.0f, pos.y + 1.0f), IM_COL32(0, 0, 0, 220), text);
+		drawList->AddText(font, debugFontSize, pos, IM_COL32(255, 255, 255, 255), text);
+		y += lineHeight;
+	}
 }
 
 
@@ -3488,6 +3546,9 @@ void draw() {
 					ImGui::TextDisabled("Current: --");
 				}
 			}
+			ImGui::Checkbox("Zombie Counter Debug", &bZombieCounterDebug);
+			ImGui::SameLine();
+			HelpMarker("Draws every known zombie counter offset on screen with its current 4-byte integer value.");
 
 			ImGui::Separator();
 
