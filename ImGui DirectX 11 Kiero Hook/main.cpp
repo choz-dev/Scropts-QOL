@@ -220,6 +220,26 @@ void drawTracers() {
 	}
 }
 
+// List of offsets that work for zombie counter:
+/* blackops3.exe+A037D0C
+*  blackops3.exe+17679850
+*  blackops3.exe+17679908
+*  blackops3.exe+176799C0
+*  blackops3.exe+17679A78
+*  blackops3.exe+17679B30
+*  blackops3.exe+17679BE8
+*  blackops3.exe+17679CA0
+*  blackops3.exe+17679D58
+*  blackops3.exe+17679E10
+*  blackops3.exe+17679EC8
+*  blackops3.exe+17679F80
+*  blackops3.exe+1767A038 
+*  blackops3.exe+1767A0F0
+*  blackops3.exe+1767A1A8
+*  blackops3.exe+1767A260
+*  blackops3.exe+1767A318
+*  blackops3.exe+196C89FC
+*/
 static constexpr uintptr_t ZOMBIE_COUNTER_OFFSET = 0x1767A038;
 
 static bool CanReadAddress(uintptr_t address)
