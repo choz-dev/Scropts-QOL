@@ -74,6 +74,7 @@ extern bool bTracers;
 extern bool bUIRgb;
 extern bool bUnlockDLC;
 extern bool bUnlockFullGame;
+extern bool bZombieCounter;
 extern bool bNukes;
 extern bool bModTools;
 
@@ -117,6 +118,8 @@ extern std::ofstream myfile;
 extern ImColor mainColor;
 extern ImColor uiColor;
 extern ImColor mainRgb();
+
+extern HWND window;
 
 // Extern function pointers
 extern CG_DObjGetWorldTagPosInternalT CG_DObjGetWorldTagPosInternal;

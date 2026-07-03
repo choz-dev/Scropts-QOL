@@ -220,6 +220,77 @@ void drawTracers() {
 	}
 }
 
+static constexpr uintptr_t ZOMBIE_COUNTER_OFFSET = 0x1767A038;
+
+static bool CanReadAddress(uintptr_t address)
+{
+	MEMORY_BASIC_INFORMATION mbi{};
+	if (!VirtualQuery(reinterpret_cast<LPCVOID>(address), &mbi, sizeof(mbi)))
+		return false;
+
+	if (mbi.State != MEM_COMMIT)
+		return false;
+
+	if (mbi.Protect & (PAGE_GUARD | PAGE_NOACCESS))
+		return false;
+
+	const DWORD readable =
+		PAGE_READONLY |
+		PAGE_READWRITE |
+		PAGE_WRITECOPY |
+		PAGE_EXECUTE_READ |
+		PAGE_EXECUTE_READWRITE |
+		PAGE_EXECUTE_WRITECOPY;
+
+	return (mbi.Protect & readable) != 0;
+}
+
+static bool TryReadZombiesLeft(int& zombiesLeft)
+{
+	const uintptr_t address = ProcessBase + ZOMBIE_COUNTER_OFFSET;
+	if (!CanReadAddress(address))
+		return false;
+
+	__try {
+		zombiesLeft = *reinterpret_cast<int*>(address);
+	}
+	__except (EXCEPTION_EXECUTE_HANDLER) {
+		return false;
+	}
+
+	return zombiesLeft >= 0 && zombiesLeft < 4096;
+}
+
+static void DrawZombieCounterOverlay()
+{
+	if (!bZombieCounter)
+		return;
+
+	int zombiesLeft = 0;
+	if (!TryReadZombiesLeft(zombiesLeft))
+		return;
+
+	char text[64]{};
+	sprintf_s(text, "Zombies: %d", zombiesLeft);
+
+	const float fontSize = 24.0f;
+	ImFont* font = ImGui::GetFont();
+	const ImVec2 textSize = font->CalcTextSizeA(fontSize, FLT_MAX, 0.0f, text);
+	float screenWidth = ImGui::GetIO().DisplaySize.x;
+	if (screenWidth <= 0.0f) {
+		RECT rect{};
+		if (window && GetClientRect(window, &rect)) {
+			screenWidth = static_cast<float>(rect.right - rect.left);
+		}
+	}
+
+	const ImVec2 pos((screenWidth - textSize.x) * 0.5f, 32.0f);
+
+	ImDrawList* drawList = ImGui::GetForegroundDrawList();
+	drawList->AddText(font, fontSize, ImVec2(pos.x + 2.0f, pos.y + 2.0f), IM_COL32(0, 0, 0, 210), text);
+	drawList->AddText(font, fontSize, pos, IM_COL32(255, 255, 255, 255), text);
+}
+
 
 const char* getItemNameforItemID(int ItemId) {
 
@@ -3386,6 +3457,17 @@ void draw() {
 			}
 
 			ImGui::Checkbox("Online Rank / Gobblegums in Workshop Maps", &bModTools);
+			ImGui::Checkbox("Zombie Counter", &bZombieCounter);
+			if (bZombieCounter) {
+				int zombiesLeft = 0;
+				ImGui::SameLine();
+				if (TryReadZombiesLeft(zombiesLeft)) {
+					ImGui::TextDisabled("Current: %d", zombiesLeft);
+				}
+				else {
+					ImGui::TextDisabled("Current: --");
+				}
+			}
 
 			ImGui::Separator();
 
@@ -4694,6 +4776,7 @@ HRESULT __stdcall hkPresent(IDXGISwapChain* pSwapChain, UINT SyncInterval, UINT 
 
 	draw();
 	drawTracers();
+	DrawZombieCounterOverlay();
 
 	if (bNotifications) {
 		ImGui::RenderNotifications();

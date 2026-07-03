@@ -42,13 +42,13 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v145</PlatformToolset>
+    <PlatformToolset>v143</PlatformToolset>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v145</PlatformToolset>
+    <PlatformToolset>v143</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
@@ -111,7 +111,7 @@
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
-      <AdditionalDependencies>$(CoreLibraryDependencies);C:\Program Files (x86)\Microsoft DirectX SDK (June 2010)\Lib\x64\d3dx11.lib;$(SolutionDir)ImGui DirectX 11 Kiero Hook\minhook\lib\libMinHook.x64.lib;$(SolutionDir)ImGui DirectX 11 Kiero Hook\detours\detours.lib</AdditionalDependencies>
+      <AdditionalDependencies>$(CoreLibraryDependencies);$(SolutionDir)ImGui DirectX 11 Kiero Hook\minhook\lib\libMinHook.x64.lib;$(SolutionDir)ImGui DirectX 11 Kiero Hook\detours\detours.lib</AdditionalDependencies>
       <AdditionalOptions>/NODEFAULTLIB:LIBCMTD %(AdditionalOptions)</AdditionalOptions>
     </Link>
   </ItemDefinitionGroup>
@@ -148,7 +148,7 @@
       <SubSystem>Console</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalDependencies>$(CoreLibraryDependencies);C:\Program Files (x86)\Microsoft DirectX SDK (June 2010)\Lib\x64\d3dx11.lib;$(SolutionDir)ImGui DirectX 11 Kiero Hook\minhook\lib\libMinHook.x64.lib;$(SolutionDir)ImGui DirectX 11 Kiero Hook\detours\detours.lib</AdditionalDependencies>
+      <AdditionalDependencies>$(CoreLibraryDependencies);$(SolutionDir)ImGui DirectX 11 Kiero Hook\minhook\lib\libMinHook.x64.lib;$(SolutionDir)ImGui DirectX 11 Kiero Hook\detours\detours.lib</AdditionalDependencies>
       <AdditionalOptions>/NODEFAULTLIB:LIBCMTD %(AdditionalOptions)</AdditionalOptions>
     </Link>
   </ItemDefinitionGroup>

@@ -945,7 +945,7 @@ namespace hooks {
 		}
 
 		void hkUI_Interface_DrawText(unsigned int localClientNum, __int64* luiElement, float xPos, float yPos, unsigned int R, unsigned int G, unsigned int B, unsigned int A, char flags, char* text, __int64 font, float fontHeight, float wrapWidth, float alignment, char luaVM, QWORD* element) {
-			
+
 			std::string curText(text ? text : "");
 			if (text != NULL) {
 
